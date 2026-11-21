@@ -1,0 +1,54 @@
+name: KANE SA CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .ci-src/KANE_SA/package.json
+
+      - name: Locate and extract KANE SA archive
+        shell: bash
+        run: |
+          ARCHIVE="$(find . -maxdepth 1 -type f -name 'KANE_SA_v1.7.0_DEV0_REAL_MONEY_LOCKED.zip' -print -quit)"
+          if [ -z "$ARCHIVE" ]; then
+            echo "KANE SA source ZIP was not found in the repository root."
+            exit 1
+          fi
+          mkdir -p .ci-src
+          unzip -q "$ARCHIVE" -d .ci-src
+          test -f .ci-src/KANE_SA/package.json
+
+      - name: Install dependencies
+        working-directory: .ci-src/KANE_SA
+        run: npm install --no-audit --no-fund
+
+      - name: Type check
+        working-directory: .ci-src/KANE_SA
+        run: npm run typecheck
+
+      - name: Lint
+        working-directory: .ci-src/KANE_SA
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: .ci-src/KANE_SA
+        run: npm test
+
+      - name: Build Next.js application
+        working-directory: .ci-src/KANE_SA
+        run: npm run build
