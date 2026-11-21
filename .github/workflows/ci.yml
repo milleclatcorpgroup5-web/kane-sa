@@ -18,8 +18,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: .ci-src/KANE_SA/package.json
 
       - name: Locate and extract KANE SA archive
         shell: bash
