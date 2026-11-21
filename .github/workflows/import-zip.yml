@@ -1,0 +1,61 @@
+name: Import KANE SA ZIP into repository
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_import:
+        description: "Konfime mwen vle ekstrè ZIP la epi mete fichye sous yo nan rasin repository a."
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  import-source:
+    if: ${{ inputs.confirm_import }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="KANE_SA_v1.7.0_DEV0_REAL_MONEY_LOCKED.zip"
+          test -f "$ARCHIVE" || { echo "ZIP la pa jwenn nan rasin repository a."; exit 1; }
+          mkdir -p /tmp/kane-source
+          unzip -q "$ARCHIVE" -d /tmp/kane-source
+          test -f /tmp/kane-source/KANE_SA/package.json || {
+            echo "Estrikti ZIP la pa jan nou te espere a: KANE_SA/package.json manke."
+            exit 1
+          }
+
+      - name: Copy project files into repository root
+        shell: bash
+        run: |
+          set -euo pipefail
+          rsync -a --exclude='.git/' /tmp/kane-source/KANE_SA/ ./
+          test -f package.json
+          test -d app
+          test -d supabase
+
+      - name: Commit and push extracted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Pa gen nouvo chanjman pou commit."
+            exit 0
+          fi
+          git commit -m "Import KANE SA v1.7.0 source from ZIP"
+          git push origin HEAD:main
