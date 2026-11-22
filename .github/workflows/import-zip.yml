@@ -1,16 +1,17 @@
-name: Import KANE SA ZIP into repository
+name: Import KANE SA ZIP and open review PR
 
 on:
   workflow_dispatch:
     inputs:
       confirm_import:
-        description: "Konfime mwen vle ekstrè ZIP la epi mete fichye sous yo nan rasin repository a."
+        description: "Konfime ekstraksyon ZIP la epi prepare yon Pull Request pou revizyon."
         required: true
         type: boolean
         default: false
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   import-source:
@@ -22,9 +23,8 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract source archive
+      - name: Extract and validate source archive
         shell: bash
         run: |
           set -euo pipefail
@@ -33,20 +33,34 @@ jobs:
           mkdir -p /tmp/kane-source
           unzip -q "$ARCHIVE" -d /tmp/kane-source
           test -f /tmp/kane-source/KANE_SA/package.json || {
-            echo "Estrikti ZIP la pa jan nou te espere a: KANE_SA/package.json manke."
+            echo "Estrikti ZIP la pa valab: KANE_SA/package.json manke."
             exit 1
           }
+          test -d /tmp/kane-source/KANE_SA/app
+          test -d /tmp/kane-source/KANE_SA/supabase
+          test -f /tmp/kane-source/KANE_SA/wrangler.jsonc
 
-      - name: Copy project files into repository root
+      - name: Prepare isolated import branch
         shell: bash
         run: |
           set -euo pipefail
-          rsync -a --exclude='.git/' /tmp/kane-source/KANE_SA/ ./
+          BRANCH="import/kane-sa-v1.7.0-$(date -u +%Y%m%d-%H%M%S)"
+          echo "IMPORT_BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git switch -c "$BRANCH"
+
+      - name: Copy source without overwriting repository import workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rsync -a --exclude='.git/' --exclude='.github/workflows/import-zip.yml' /tmp/kane-source/KANE_SA/ ./
           test -f package.json
           test -d app
           test -d supabase
+          test -f .github/workflows/import-zip.yml
 
-      - name: Commit and push extracted source
+      - name: Commit import and open pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -54,8 +68,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
-            echo "Pa gen nouvo chanjman pou commit."
+            echo "Pa gen diferans pou enpòte; pa gen PR ki nesesè."
             exit 0
           fi
-          git commit -m "Import KANE SA v1.7.0 source from ZIP"
-          git push origin HEAD:main
+          git commit -m "Import KANE SA v1.7.0 source"
+          git push --set-upstream origin "$IMPORT_BRANCH"
+          gh pr create --base main --head "$IMPORT_BRANCH" \
+            --title "Import KANÈ SA v1.7.0 source" \
+            --body "## Entegrasyon sous KANÈ SA\n\n- Sous la soti nan achiv v1.7.0-dev.0.\n- Chanjman yo sou yon branch apa; main pa modifye dirèkteman.\n- CI dwe pase anvan merge.\n- Verrou lajan reyèl yo rete fèmen; pa gen deplwaman Production nan PR sa a."
