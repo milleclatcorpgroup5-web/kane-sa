@@ -1,0 +1,106 @@
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type AppRole = 'kliyan' | 'kanesa' | 'admin';
+export type PlanFrequency = 'daily' | 'weekly' | 'monthly' | 'flexible';
+export type PlanStatus = 'active' | 'paused' | 'closed';
+export type DepositStatus = 'pending' | 'confirmed' | 'rejected';
+export type WithdrawalStatus = 'pending' | 'approved' | 'rejected' | 'paid';
+
+type Table<Row> = { Row: Row; Insert: Partial<Row>; Update: Partial<Row>; Relationships: [] };
+
+type ProfileRow = { id:string; role:AppRole; full_name:string; phone:string|null; created_at:string; updated_at:string };
+type SettingsRow = { id:number; normal_withdrawal_fee_percent:number; emergency_withdrawal_fee_percent:number; fees_enabled:boolean; maintenance_mode:boolean; updated_at:string };
+type PlanRow = { id:string; user_id:string; kanesa_id:string|null; title:string; has_goal:boolean; goal_amount:number|null; planned_contribution:number|null; frequency:PlanFrequency; status:PlanStatus; start_date:string; created_at:string; updated_at:string };
+type DepositRequestRow = { id:string; plan_id:string; user_id:string; method:'moncash'|'natcash'|'cash'|'bank'|'other'; amount:number; customer_reference:string|null; admin_note:string|null; status:DepositStatus; reviewed_by:string|null; reviewed_at:string|null; created_at:string };
+type DepositRow = { id:string; plan_id:string; user_id:string; deposit_request_id:string; amount:number; method:'moncash'|'natcash'|'cash'|'bank'|'other'; verified_reference:string|null; confirmed_by:string; created_at:string };
+type WithdrawalRow = { id:string; plan_id:string; user_id:string; kind:'normal'|'emergency'; reason_category:'medical'|'death'|'family_emergency'|'other'|null; reason_text:string|null; gross_amount:number; fee_percent:number; fee_amount:number; net_amount:number; payment_method:'moncash'|'natcash'|'cash'|'bank'|null; payment_reference:string|null; admin_note:string|null; status:WithdrawalStatus; reviewed_by:string|null; reviewed_at:string|null; paid_by:string|null; paid_at:string|null; authorization_mode:'automatic'|'manual_review'|'legacy_manual'; manual_review_reason:string|null; auto_authorized_at:string|null; idempotency_key:string|null; created_at:string };
+type PushTokenRow = { id:string; user_id:string; token:string; platform:'web'|'android'|'ios'; created_at:string; last_seen_at:string };
+type AuditRow = { id:number; actor_id:string|null; action:string; entity_type:string; entity_id:string|null; metadata:Json; created_at:string };
+type TxRow = { id:string; user_id:string; kind:'in'|'out'; category:string; amount:number; note:string|null; occurred_on:string; idempotency_key:string; created_at:string };
+type BudgetRow = { user_id:string; category:string; monthly_limit:number; updated_at:string };
+type KycRow = { user_id:string; legal_name:string; date_of_birth:string; address:string; document_type:string; document_last4:string; status:'pending'|'verified'|'rejected'; review_note:string|null; reviewed_by:string|null; reviewed_at:string|null; submitted_at:string };
+type AmlRow = { id:string; user_id:string; ref_type:string; ref_id:string; reason:string; status:'open'|'cleared'; created_at:string };
+type GateRow = { key:string; label:string; done:boolean; done_by:string|null; done_at:string|null };
+type CompRow = { id:number; kyc_threshold:number; aml_review_amount:number; aml_max_requests_24h:number; live_mode:boolean };
+type PlanBalanceRow = { plan_id:string; user_id:string; kanesa_id:string|null; title:string; goal_amount:number|null; has_goal:boolean; status:PlanStatus; deposited_total:number; withdrawn_total:number; balance:number; available_balance:number };
+type SystemControlsRow = { id:number; deposits_enabled:boolean; withdrawal_requests_enabled:boolean; public_notice:string|null; updated_by:string|null; updated_at:string };
+type SupportTicketRow = { id:string; user_id:string; subject:string; category:'account'|'deposit'|'withdrawal'|'savings_plan'|'security'|'other'; priority:'normal'|'high'|'urgent'; status:'open'|'in_progress'|'waiting_customer'|'resolved'|'closed'; created_at:string; updated_at:string; last_message_at:string };
+type SupportMessageRow = { id:string; ticket_id:string; sender_id:string; body:string; created_at:string };
+type NotificationRow = { id:string; user_id:string; kind:'deposit'|'withdrawal'|'support'|'security'|'system'; title:string; body:string; href:string; created_at:string; read_at:string|null };
+type MoneyRailControlsRow = { id:number; live_money_enabled:false; inbound_enabled:false; outbound_enabled:false; sandbox_enabled:false; kill_switch:true; locked_reason:string; updated_at:string };
+type MoneyProviderRow = { provider:'moncash'|'natcash'|'bank'; display_name:string; enabled:false; environment:'disabled'; credentials_present:false; sandbox_verified:false; live_verified:false; inbound_enabled:false; outbound_enabled:false; merchant_reference:string|null; webhook_url_configured:false; webhook_signature_verified:false; last_checked_at:string|null; updated_at:string };
+type PaymentIntentRow = { id:string; direction:'inbound'|'outbound'; provider:'moncash'|'natcash'|'bank'; deposit_request_id:string|null; withdrawal_request_id:string|null; amount:number; currency:'HTG'; status:'staged'; idempotency_key:string; provider_reference:string|null; expires_at:string|null; created_at:string };
+type PayoutAttemptRow = { id:string; withdrawal_request_id:string; provider:'moncash'|'natcash'|'bank'; attempt_number:number; amount:number; currency:'HTG'; status:'staged'; idempotency_key:string; provider_reference:string|null; provider_transaction_id:string|null; failure_code:string|null; created_at:string; submitted_at:string|null; completed_at:string|null };
+type ProviderWebhookRow = { id:string; provider:'moncash'|'natcash'|'bank'; provider_event_id:string; payload_sha256:string; signature_verified:false; processing_status:'blocked'; received_at:string };
+type SettlementBatchRow = { id:string; provider:'moncash'|'natcash'|'bank'; statement_reference:string|null; period_start:string; period_end:string; currency:'HTG'; inbound_total:number; outbound_total:number; fees_total:number; file_sha256:string|null; status:'staged'; imported_by:string|null; imported_at:string };
+type SettlementEntryRow = { id:string; batch_id:string; provider:'moncash'|'natcash'|'bank'; external_transaction_id:string; direction:'inbound'|'outbound'|'fee'|'adjustment'; amount:number; currency:'HTG'; occurred_at:string|null; internal_reference:string|null; match_status:'not_reconciled'; created_at:string };
+type ProviderReconciliationRunRow = { id:string; provider:'moncash'|'natcash'|'bank'; settlement_batch_id:string; status:'staged'; matched_count:number; unmatched_count:number; mismatched_count:number; difference_total:number; created_by:string|null; created_at:string };
+type ProviderReconciliationIssueRow = { id:string; run_id:string; statement_entry_id:string|null; issue_code:'provider_only'|'internal_only'|'amount_mismatch'|'currency_mismatch'|'duplicate_reference'|'status_mismatch'; internal_reference:string|null; external_transaction_id:string|null; internal_amount:number|null; external_amount:number|null; status:'open'; created_at:string };
+
+export type Database = {
+  public: {
+    Tables: {
+      profiles: Table<ProfileRow>;
+      app_settings: Table<SettingsRow>;
+      savings_plans: Table<PlanRow>;
+      transactions: Table<TxRow>;
+      budgets: Table<BudgetRow>;
+      kyc_profiles: Table<KycRow>;
+      aml_flags: Table<AmlRow>;
+      go_live_gates: Table<GateRow>;
+      compliance_settings: Table<CompRow>;
+      deposit_requests: Table<DepositRequestRow>;
+      deposits: Table<DepositRow>;
+      withdrawal_requests: Table<WithdrawalRow>;
+      push_tokens: Table<PushTokenRow>;
+      audit_logs: Table<AuditRow>;
+      system_controls: Table<SystemControlsRow>;
+      support_tickets: Table<SupportTicketRow>;
+      support_ticket_messages: Table<SupportMessageRow>;
+      user_notifications: Table<NotificationRow>;
+      money_rail_controls: Table<MoneyRailControlsRow>;
+      money_provider_accounts: Table<MoneyProviderRow>;
+      payment_intents: Table<PaymentIntentRow>;
+      payout_attempts: Table<PayoutAttemptRow>;
+      provider_webhook_inbox: Table<ProviderWebhookRow>;
+      provider_settlement_batches: Table<SettlementBatchRow>;
+      provider_settlement_entries: Table<SettlementEntryRow>;
+      provider_reconciliation_runs: Table<ProviderReconciliationRunRow>;
+      provider_reconciliation_issues: Table<ProviderReconciliationIssueRow>;
+    };
+    Views: {
+      plan_balances: { Row: PlanBalanceRow; Relationships: [] };
+      integrity_checks: { Row: { check_name:string; violations:number }; Relationships: [] };
+      admin_reconciliation_checks: { Row: { check_name:string; violations:number; severity:'critical'|'high' }; Relationships: [] };
+    };
+    Functions: {
+      current_role: { Args: Record<PropertyKey, never>; Returns: AppRole | null };
+      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      request_withdrawal: { Args: { p_plan_id:string; p_gross_amount:number; p_kind:string; p_reason_category?:string|null; p_reason_text?:string|null; p_payment_method?:string|null; p_expected_fee_percent?:number|null; p_idempotency_key?:string|null }; Returns: Json };
+      quote_withdrawal: { Args: { p_plan_id:string; p_gross_amount:number }; Returns: Json };
+      admin_confirm_deposit: { Args: { p_request_id:string; p_verified_reference?:string|null }; Returns: string };
+      admin_reject_deposit: { Args: { p_request_id:string; p_note?:string|null }; Returns: undefined };
+      admin_review_withdrawal: { Args: { p_request_id:string; p_decision:string; p_note?:string|null }; Returns: undefined };
+      submit_kyc: { Args: { p_legal_name:string; p_dob:string; p_address:string; p_doc_type:string; p_doc_last4:string }; Returns: undefined };
+      admin_review_kyc: { Args: { p_user_id:string; p_decision:string; p_note?:string|null }; Returns: undefined };
+      admin_clear_aml_flag: { Args: { p_id:string }; Returns: undefined };
+      admin_set_gate: { Args: { p_key:string; p_done:boolean }; Returns: undefined };
+      admin_set_live_mode: { Args: { p_live:boolean }; Returns: undefined };
+      admin_set_role: { Args: { p_user_id:string; p_role:string }; Returns: undefined };
+      admin_assign_kanesa: { Args: { p_plan_id:string; p_kanesa_id:string|null }; Returns: undefined };
+      rate_limit_hit: { Args: { p_key:string; p_max:number; p_window_seconds:number }; Returns: boolean };
+      admin_mark_withdrawal_paid: { Args: { p_request_id:string; p_payment_reference:string }; Returns: undefined };
+      admin_set_system_controls: { Args: { p_deposits_enabled:boolean; p_withdrawal_requests_enabled:boolean; p_public_notice?:string|null }; Returns: undefined };
+      create_support_ticket: { Args: { p_subject:string; p_category:string; p_initial_message:string }; Returns: string };
+      admin_update_support_ticket: { Args: { p_ticket_id:string; p_status:string; p_reply?:string|null }; Returns: undefined };
+      mark_notification_read: { Args: { p_notification_id:string }; Returns: undefined };
+    };
+    Enums: {
+      app_role: AppRole;
+      plan_frequency: PlanFrequency;
+      plan_status: PlanStatus;
+      deposit_status: DepositStatus;
+      withdrawal_status: WithdrawalStatus;
+    };
+    CompositeTypes: { [_ in never]: never };
+  };
+};

@@ -1,0 +1,54 @@
+name: Deploy to Cloudflare Workers
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: 'Mwen konfime tout pòtay GO_LIVE yo pase, epi mwen vle deploye Production.'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    if: ${{ inputs.confirm_production }}
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Enstale depandans
+        run: npm install --no-audit --no-fund
+      - name: Verifye aplikasyon an
+        run: npm run verify
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      - name: Verifye sekrè Cloudflare yo
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo 'CLOUDFLARE_API_TOKEN manke'; exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo 'CLOUDFLARE_ACCOUNT_ID manke'; exit 1)
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || (echo 'NEXT_PUBLIC_SUPABASE_URL manke'; exit 1)
+          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" || (echo 'NEXT_PUBLIC_SUPABASE_ANON_KEY manke'; exit 1)
+      - name: Deploy Worker
+        run: npm run cf:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY }}
