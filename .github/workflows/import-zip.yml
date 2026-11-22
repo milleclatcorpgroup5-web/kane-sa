@@ -76,3 +76,4 @@ jobs:
           gh pr create --base main --head "$IMPORT_BRANCH" \
             --title "Import KANÈ SA v1.7.0 source" \
             --body "## Entegrasyon sous KANÈ SA\n\n- Sous la soti nan achiv v1.7.0-dev.0.\n- Chanjman yo sou yon branch apa; main pa modifye dirèkteman.\n- CI dwe pase anvan merge.\n- Verrou lajan reyèl yo rete fèmen; pa gen deplwaman Production nan PR sa a."
+          gh workflow run ci.yml --ref "$IMPORT_BRANCH"
