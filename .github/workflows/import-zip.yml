@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rsync -a --exclude='.git/' --exclude='.github/workflows/import-zip.yml' /tmp/kane-source/KANE_SA/ ./
+          rsync -a --exclude='.git/' --exclude='.github/workflows/import-zip.yml' --exclude='.github/workflows/ci.yml' /tmp/kane-source/KANE_SA/ ./
           test -f package.json
           test -d app
           test -d supabase
