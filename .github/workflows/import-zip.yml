@@ -52,15 +52,16 @@ jobs:
           echo "IMPORT_BRANCH=$BRANCH" >> "$GITHUB_ENV"
           git switch -c "$BRANCH"
 
-      - name: Copy source without overwriting repository import workflow
+      - name: Copy source while preserving repository workflows
         shell: bash
         run: |
           set -euo pipefail
-          rsync -a --exclude='.git/' --exclude='.github/workflows/import-zip.yml' --exclude='.github/workflows/ci.yml' /tmp/kane-source/KANE_SA/ ./
+          rsync -a --exclude='.git/' --exclude='.github/workflows/' /tmp/kane-source/KANE_SA/ ./
           test -f package.json
           test -d app
           test -d supabase
           test -f .github/workflows/import-zip.yml
+          test -f .github/workflows/ci.yml
 
       - name: Commit import and open pull request
         env:
@@ -79,5 +80,5 @@ jobs:
           git push --set-upstream origin "$IMPORT_BRANCH"
           gh pr create --base main --head "$IMPORT_BRANCH" \
             --title "Import KANÈ SA v1.7.0 source" \
-            --body "## Entegrasyon sous KANÈ SA\n\n- Sous la soti nan achiv v1.7.0-dev.0.\n- Chanjman yo sou yon branch apa; main pa modifye dirèkteman.\n- CI dwe pase anvan merge.\n- Verrou lajan reyèl yo rete fèmen; pa gen deplwaman Production nan PR sa a."
+            --body "## Entegrasyon sous KANÈ SA\n\n- Sous la soti nan achiv v1.7.0-dev.0.\n- Sous aplikasyon an mete sou branch apa; main pa modifye dirèkteman.\n- Workflows repository a rete entak pou evite bezwen GitHub Workflows permission.\n- CI dwe pase anvan merge.\n- Verrou lajan reyèl yo rete fèmen; pa gen deplwaman Production nan PR sa a."
           gh workflow run ci.yml --ref "$IMPORT_BRANCH"
