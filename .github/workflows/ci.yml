@@ -3,50 +3,69 @@ name: KANE SA CI
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - ".github/workflows/**"
+      - "**/*.md"
   pull_request:
     branches: ["main"]
+    paths-ignore:
+      - ".github/workflows/**"
+      - "**/*.md"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
-      - name: Locate and extract KANE SA archive
+      - name: Locate application source
+        id: source
         shell: bash
         run: |
-          ARCHIVE="$(find . -maxdepth 1 -type f -name 'KANE_SA_v1.7.0_DEV0_REAL_MONEY_LOCKED.zip' -print -quit)"
-          if [ -z "$ARCHIVE" ]; then
-            echo "KANE SA source ZIP was not found in the repository root."
+          set -euo pipefail
+          if [ -f package.json ]; then
+            echo "dir=." >> "$GITHUB_OUTPUT"
+            echo "Sous KANÈ SA jwenn nan rasin repository a."
+          elif [ -f KANE_SA_v1.7.0_DEV0_REAL_MONEY_LOCKED.zip ]; then
+            mkdir -p .ci-src
+            unzip -q KANE_SA_v1.7.0_DEV0_REAL_MONEY_LOCKED.zip -d .ci-src
+            test -f .ci-src/KANE_SA/package.json
+            echo "dir=.ci-src/KANE_SA" >> "$GITHUB_OUTPUT"
+            echo "Sous la ekstrè nan ZIP la pou verifikasyon."
+          else
+            echo "Sous aplikasyon an poko entegre. Mete fichye KANE_SA yo nan rasin repository a."
             exit 1
           fi
-          mkdir -p .ci-src
-          unzip -q "$ARCHIVE" -d .ci-src
-          test -f .ci-src/KANE_SA/package.json
 
       - name: Install dependencies
-        working-directory: .ci-src/KANE_SA
+        working-directory: ${{ steps.source.outputs.dir }}
         run: npm install --no-audit --no-fund
 
       - name: Type check
-        working-directory: .ci-src/KANE_SA
+        working-directory: ${{ steps.source.outputs.dir }}
         run: npm run typecheck
 
       - name: Lint
-        working-directory: .ci-src/KANE_SA
+        working-directory: ${{ steps.source.outputs.dir }}
         run: npm run lint
 
       - name: Run tests
-        working-directory: .ci-src/KANE_SA
+        working-directory: ${{ steps.source.outputs.dir }}
         run: npm test
 
       - name: Build Next.js application
-        working-directory: .ci-src/KANE_SA
+        working-directory: ${{ steps.source.outputs.dir }}
         run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
