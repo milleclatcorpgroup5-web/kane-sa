@@ -1,6 +1,10 @@
 name: Import KANE SA ZIP and open review PR
 
 on:
+  push:
+    paths:
+      - "KANE_SA_v1.7.0_DEV0_REAL_MONEY_LOCKED.zip"
+      - ".github/workflows/import-zip.yml"
   workflow_dispatch:
     inputs:
       confirm_import:
@@ -15,11 +19,11 @@ permissions:
 
 jobs:
   import-source:
-    if: ${{ inputs.confirm_import }}
+    if: ${{ github.event_name == 'push' || inputs.confirm_import }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
