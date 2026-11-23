@@ -136,7 +136,9 @@ create unique index if not exists idx_withdrawal_provider_reference on public.wi
 create or replace function public.set_updated_at()
 returns trigger language plpgsql set search_path = public, pg_temp as $$
 begin new.updated_at = now(); return new; end; $$;
+drop trigger if exists profiles_updated_at on public.profiles;
 create trigger profiles_updated_at before update on public.profiles for each row execute function public.set_updated_at();
+drop trigger if exists plans_updated_at on public.savings_plans;
 create trigger plans_updated_at before update on public.savings_plans for each row execute function public.set_updated_at();
 
 create or replace function public.audit_settings_update()
@@ -146,6 +148,7 @@ begin
   values(auth.uid(),'settings_updated','app_settings',new.id::text,jsonb_build_object('fees_enabled',new.fees_enabled,'maintenance_mode',new.maintenance_mode,'normal_fee_percent',new.normal_withdrawal_fee_percent,'emergency_fee_percent',new.emergency_withdrawal_fee_percent));
   return new;
 end; $$;
+drop trigger if exists audit_settings_after_update on public.app_settings;
 create trigger audit_settings_after_update after update on public.app_settings for each row execute function public.audit_settings_update();
 
 -- Kreye pwofil la otomatikman lè Supabase Auth kreye itilizatè a.
@@ -159,6 +162,7 @@ begin
   on conflict (id) do nothing;
   return new;
 end; $$;
+drop trigger if exists on_auth_user_created on auth.users;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
 
@@ -181,6 +185,7 @@ begin
   if new.id is distinct from old.id then raise exception 'ID pwofil la pa ka chanje.'; end if;
   return new;
 end; $$;
+drop trigger if exists prevent_profile_role_change on public.profiles;
 create trigger prevent_profile_role_change before update on public.profiles for each row execute function public.prevent_profile_privilege_escalation();
 
 -- Balans aktyèl = depo admin konfime mwens retrè ki deja peye.
@@ -463,6 +468,7 @@ create index if not exists ledger_plan_idx on public.ledger_entries (plan_id, ac
 
 create or replace function public.ledger_block_change() returns trigger language plpgsql as $$
 begin raise exception 'Ledger la se append-only: pa gen modifikasyon ni efasman.'; end $$;
+drop trigger if exists ledger_no_update on public.app_settings;
 create trigger ledger_no_update before update or delete on public.ledger_entries for each row execute function public.ledger_block_change();
 
 create or replace function public.ledger_check_balanced() returns trigger language plpgsql as $$
@@ -482,6 +488,7 @@ begin
     (t, 'customer_liability', new.plan_id, 0, new.amount, 'deposit', new.id);
   return new;
 end $$;
+drop trigger if exists deposits_post_ledger on public.app_settings;
 create trigger deposits_post_ledger after insert on public.deposits for each row execute function public.post_deposit_ledger();
 
 create or replace function public.post_withdrawal_ledger() returns trigger language plpgsql security definer set search_path = public, pg_temp as $$
@@ -496,6 +503,7 @@ begin
   end if;
   return new;
 end $$;
+drop trigger if exists withdrawals_post_ledger on public.app_settings;
 create trigger withdrawals_post_ledger after update on public.withdrawal_requests for each row
   when (old.status is distinct from 'paid' and new.status = 'paid') execute function public.post_withdrawal_ledger();
 
@@ -624,6 +632,7 @@ begin
   end if;
   return new;
 end $$;
+drop trigger if exists withdrawal_kyc_gate on public.app_settings;
 create trigger withdrawal_kyc_gate before insert on public.withdrawal_requests for each row execute function public.enforce_kyc_for_withdrawal();
 
 create or replace function public.aml_screen() returns trigger language plpgsql security definer set search_path = public, pg_temp as $$
@@ -640,7 +649,9 @@ begin
   end if;
   return new;
 end $$;
+drop trigger if exists aml_deposit_screen on public.app_settings;
 create trigger aml_deposit_screen after insert on public.deposit_requests for each row execute function public.aml_screen();
+drop trigger if exists aml_withdrawal_screen on public.app_settings;
 create trigger aml_withdrawal_screen after insert on public.withdrawal_requests for each row execute function public.aml_screen();
 
 revoke all on function public.submit_kyc(text,date,text,text,text), public.admin_review_kyc(uuid,text,text), public.admin_clear_aml_flag(uuid), public.admin_set_gate(text,boolean), public.admin_set_live_mode(boolean) from public, anon;
@@ -1536,9 +1547,11 @@ begin
 end;
 $$;
 drop trigger if exists system_switch_deposit_guard on public.deposit_requests;
+drop trigger if exists system_switch_deposit_guard on public.app_settings;
 create trigger system_switch_deposit_guard before insert on public.deposit_requests
   for each row execute function public.enforce_system_deposit_switch();
 drop trigger if exists system_switch_withdrawal_guard on public.withdrawal_requests;
+drop trigger if exists system_switch_withdrawal_guard on public.app_settings;
 create trigger system_switch_withdrawal_guard before insert on public.withdrawal_requests
   for each row execute function public.enforce_system_withdrawal_switch();
 
@@ -1653,6 +1666,7 @@ begin
 end;
 $$;
 drop trigger if exists support_message_touch_ticket on public.support_ticket_messages;
+drop trigger if exists support_message_touch_ticket on public.app_settings;
 create trigger support_message_touch_ticket after insert on public.support_ticket_messages
   for each row execute function public.touch_support_ticket();
 
@@ -1745,18 +1759,23 @@ begin
 end;
 $$;
 drop trigger if exists notify_deposit_request_insert on public.deposit_requests;
+drop trigger if exists notify_deposit_request_insert on public.app_settings;
 create trigger notify_deposit_request_insert after insert on public.deposit_requests
   for each row execute function public.notify_deposit_request_created();
 drop trigger if exists notify_deposit_insert on public.deposits;
+drop trigger if exists notify_deposit_insert on public.app_settings;
 create trigger notify_deposit_insert after insert on public.deposits
   for each row execute function public.notify_deposit_confirmed();
 drop trigger if exists notify_deposit_reject on public.deposit_requests;
+drop trigger if exists notify_deposit_reject on public.app_settings;
 create trigger notify_deposit_reject after update on public.deposit_requests
   for each row execute function public.notify_deposit_rejected();
 drop trigger if exists notify_withdrawal_insert on public.withdrawal_requests;
+drop trigger if exists notify_withdrawal_insert on public.app_settings;
 create trigger notify_withdrawal_insert after insert on public.withdrawal_requests
   for each row execute function public.notify_withdrawal_created();
 drop trigger if exists notify_withdrawal_update on public.withdrawal_requests;
+drop trigger if exists notify_withdrawal_update on public.app_settings;
 create trigger notify_withdrawal_update after update on public.withdrawal_requests
   for each row execute function public.notify_withdrawal_status_change();
 
@@ -1790,9 +1809,11 @@ begin
 end;
 $$;
 drop trigger if exists notify_customer_support_reply_insert on public.support_ticket_messages;
+drop trigger if exists notify_customer_support_reply_insert on public.app_settings;
 create trigger notify_customer_support_reply_insert after insert on public.support_ticket_messages
   for each row execute function public.notify_customer_support_reply();
 drop trigger if exists notify_support_ticket_status_update on public.support_tickets;
+drop trigger if exists notify_support_ticket_status_update on public.app_settings;
 create trigger notify_support_ticket_status_update after update on public.support_tickets
   for each row execute function public.notify_support_ticket_status_change();
 
@@ -2128,6 +2149,7 @@ begin
 end;
 $$;
 drop trigger if exists payment_intent_target_guard on public.payment_intents;
+drop trigger if exists payment_intent_target_guard on public.app_settings;
 create trigger payment_intent_target_guard before insert or update on public.payment_intents
   for each row execute function public.validate_payment_intent_target();
 
@@ -2148,6 +2170,7 @@ begin
 end;
 $$;
 drop trigger if exists payout_attempt_target_guard on public.payout_attempts;
+drop trigger if exists payout_attempt_target_guard on public.app_settings;
 create trigger payout_attempt_target_guard before insert or update on public.payout_attempts
   for each row execute function public.validate_payout_attempt_target();
 
@@ -2165,6 +2188,7 @@ begin
 end;
 $$;
 drop trigger if exists settlement_entry_provider_guard on public.provider_settlement_entries;
+drop trigger if exists settlement_entry_provider_guard on public.app_settings;
 create trigger settlement_entry_provider_guard before insert or update on public.provider_settlement_entries
   for each row execute function public.validate_settlement_entry_provider();
 
@@ -2218,6 +2242,7 @@ begin
 end;
 $$;
 drop trigger if exists provider_reconciliation_run_guard on public.provider_reconciliation_runs;
+drop trigger if exists provider_reconciliation_run_guard on public.app_settings;
 create trigger provider_reconciliation_run_guard before insert or update on public.provider_reconciliation_runs
   for each row execute function public.validate_provider_reconciliation_run();
 
@@ -2237,6 +2262,7 @@ begin
 end;
 $$;
 drop trigger if exists provider_reconciliation_issue_guard on public.provider_reconciliation_issues;
+drop trigger if exists provider_reconciliation_issue_guard on public.app_settings;
 create trigger provider_reconciliation_issue_guard before insert or update on public.provider_reconciliation_issues
   for each row execute function public.validate_provider_reconciliation_issue();
 
@@ -2253,6 +2279,7 @@ begin
 end;
 $$;
 drop trigger if exists money_rail_control_no_delete on public.money_rail_controls;
+drop trigger if exists money_rail_control_no_delete on public.app_settings;
 create trigger money_rail_control_no_delete before delete on public.money_rail_controls
   for each row execute function public.prevent_money_rail_control_delete();
 revoke all on function public.prevent_money_rail_control_delete() from public, anon, authenticated;
