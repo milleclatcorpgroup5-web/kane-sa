@@ -22,3 +22,38 @@
 
 /* v1.6.1: global audit, maintenance notice */
 .audit-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;align-items:end}.audit-filters .field{margin:4px 0}.audit-metadata{display:block;max-width:260px;max-height:90px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:var(--muted)}.is-disabled{pointer-events:none;opacity:.45}.global-status-banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px max(18px,calc((100% - 1120px)/2));background:#eaf5fb;border-bottom:1px solid #c9e2f3;color:#16476a;font-size:13px}.global-status-banner.maintenance{background:#fff2e8;border-color:#f1d0b7;color:#7a3c12}.global-status-banner strong{font-weight:850}
+
+
+/* KANÈ SA — navigasyon aplikasyon an */
+.brand-copy{display:flex;flex-direction:column;gap:1px;line-height:1.1}
+.brand-copy strong{font-size:17px;letter-spacing:.8px}
+.brand-copy small{font-size:10px;font-weight:650;letter-spacing:.15px;color:var(--muted)}
+.nav-links{gap:8px}
+.nav-main-link,.nav-menu>summary,.nav-links>a:not(.nav-cta){display:inline-flex;align-items:center;gap:7px;padding:10px 12px;border-radius:10px;color:#40566a;font-size:13px;font-weight:750;cursor:pointer;list-style:none}
+.nav-main-link:hover,.nav-menu>summary:hover,.nav-links>a:not(.nav-cta):hover{background:#f0f5f9;text-decoration:none;color:var(--navy)}
+.nav-menu{position:relative}
+.nav-menu>summary::-webkit-details-marker{display:none}
+.nav-menu>summary span{font-size:15px;color:#8091a1}
+.nav-menu[open]>summary{background:#edf4f9;color:var(--navy)}
+.nav-menu-panel{position:absolute;top:calc(100% + 10px);left:0;z-index:40;width:285px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:0 18px 45px rgba(18,48,74,.16);display:grid;gap:3px}
+.nav-menu-panel-right{left:auto;right:0}
+.nav-menu-panel a{display:flex;align-items:center;gap:12px;padding:11px;border-radius:10px;color:var(--ink)}
+.nav-menu-panel a:hover{background:#f3f7fa;text-decoration:none}
+.nav-menu-panel a>span:first-child{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:10px;background:#edf4f9;font-size:17px}
+.nav-menu-panel a>span:last-child{display:grid;gap:3px}
+.nav-menu-panel strong{font-size:13px;color:var(--navy)}
+.nav-menu-panel small{font-size:11px;color:var(--muted)}
+.nav-logout{margin:0 0 0 5px;padding-left:12px;border-left:1px solid var(--line)}
+.nav-logout .link-button{padding:9px 8px;font-size:13px}
+.nav-cta{border-radius:10px;padding:10px 15px;font-size:13px;font-weight:800}
+.bottom-nav a[aria-current=page]{color:var(--blue);background:#eaf2f8}
+.bottom-nav a[aria-current=page] span{font-weight:900}
+@media(max-width:760px){
+ .topbar-inner{min-height:58px;padding:8px 0}
+ .brand-copy strong{font-size:16px}
+ .brand-copy small{font-size:9px}
+ .nav-links{display:none}
+ .bottom-nav{box-shadow:0 -8px 28px rgba(18,48,74,.08);grid-template-columns:repeat(5,minmax(0,1fr))}
+ .bottom-nav a{font-size:10px;letter-spacing:-.1px}
+ .bottom-nav a span{font-size:21px;font-weight:750}
+}
