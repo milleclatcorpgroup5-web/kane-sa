@@ -176,13 +176,15 @@ Pwojè sa a konsève Next.js 15 + OpenNext pou limite chanjman sou baz V2 a. Ope
 
 `wrangler.jsonc` deja fikse non Worker la kòm `kane-sa-web`. Chanje non sa a si non an deja itilize sou kont Cloudflare ou.
 
-### Adrès sit la: Workers, pa Pages
+### De chemen Cloudflare yo: Pages ak Workers
 
-KANÈ SA itilize **Cloudflare Workers + OpenNext**. Li pa kreye yon pwojè Pages, kidonk `https://kane-sa.pages.dev` pa adrès aplikasyon sa a. Konfigirasyon an aktive `workers_dev` pou Worker la ka resevwa yon adrès `workers.dev` si subdomain Workers la aktive sou kont Cloudflare la.
+Repository sa a gen yon konfigirasyon **Cloudflare Workers + OpenNext** (`wrangler.jsonc`, Worker `kane-sa-web`) ansanm ak yon koneksyon Cloudflare Pages ki kapab kreye preview `pages.dev` lè gen yon Pull Request. De deplwaman sa yo pa menm bagay.
 
-Apre deplwaman, jwenn adrès egzak la nan **Cloudflare → Workers & Pages → kane-sa-web → Settings → Domains & Routes**. Sèvi ak adrès `workers.dev` ki parèt la, oswa ajoute yon custom domain. Pa devine account subdomain lan. Si pa gen adrès `workers.dev` ki parèt, aktive Workers.dev subdomain nan kont Cloudflare la anvan ou teste sit la.
+- Preview Pages ki parèt nan GitHub vle di Cloudflare Pages fini build/deploy preview branch lan; sa poukont li pa pwouve Worker `kane-sa-web` la te deplwaye.
+- Pou verifye Worker la, ale nan **Cloudflare → Workers & Pages → kane-sa-web → Settings → Domains & Routes** epi pran adrès egzak `workers.dev` oswa custom domain ki la.
+- `kane-sa.pages.dev` se adrès pwojè Pages la si pwojè sa a mete branch `main` kòm production branch. Verifye paj la an navigatè apre deploy; pa sipoze yon preview build egal ak production deploy.
 
-GitHub CI verifye kounye a tou `opennextjs-cloudflare build`; sa teste adaptè Worker la anplis build Next.js nòmal la. Li pa ranplase tès runtime sou adrès piblik la.
+Konfigirasyon Wrangler la aktive `workers_dev` pou Worker la ka itilize subdomain Workers la si li aktive sou kont Cloudflare la. GitHub CI teste kounye a `opennextjs-cloudflare build` tou, anplis build Next.js nòmal la. Sa verifye adaptè Worker la men li pa ranplase tès runtime sou URL piblik la.
 
 ## 6. Firebase notifikasyon (opsyonèl)
 
