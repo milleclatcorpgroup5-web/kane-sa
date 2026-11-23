@@ -57,3 +57,46 @@
  .bottom-nav a{font-size:10px;letter-spacing:-.1px}
  .bottom-nav a span{font-size:21px;font-weight:750}
 }
+
+/* KANÈ SA production dashboard structure */
+.dashboard-page{padding-top:28px}
+.dashboard-welcome{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:0 0 20px}
+.dashboard-welcome h1{font-size:clamp(27px,4vw,38px);letter-spacing:-.8px;color:var(--navy);margin:7px 0}
+.dashboard-welcome p{margin:0;color:var(--muted)}
+.dashboard-welcome .eyebrow,.dashboard-section .eyebrow{color:#6b8297}
+.dashboard-notices{display:grid;gap:8px}
+.dashboard-notices .notice{margin:5px 0}
+.dashboard-summary{display:grid;grid-template-columns:1.35fr repeat(3,minmax(0,1fr));gap:14px;margin:20px 0 30px}
+.dashboard-balance-card{display:flex;flex-direction:column;justify-content:center;gap:8px;min-height:150px;padding:23px;border-radius:17px;background:linear-gradient(135deg,#12304a,#1769aa);color:#fff;box-shadow:var(--shadow)}
+.dashboard-balance-card strong{font-size:clamp(25px,3vw,35px);letter-spacing:-.7px}
+.dashboard-balance-card>span:last-child{font-size:12px;color:#d8e9f5}
+.dashboard-card-label{font-size:11px;font-weight:850;letter-spacing:1px;color:#71869a}
+.dashboard-balance-card .dashboard-card-label{color:#c4dfef}
+.dashboard-stat{display:flex;flex-direction:column;justify-content:center;gap:8px;min-height:150px;padding:18px}
+.dashboard-stat>strong{font-size:31px;color:var(--navy)}
+.dashboard-stat>a{font-size:12px;font-weight:750}
+.dashboard-section{margin:30px 0}
+.dashboard-section-heading{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:14px}
+.dashboard-section-heading h2{margin:4px 0 0;color:var(--navy);font-size:22px}
+.dashboard-section-heading>a{font-size:13px;font-weight:750}
+.dashboard-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.dashboard-action{display:flex;flex-direction:column;gap:7px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);color:var(--navy);transition:transform .15s,border-color .15s}
+.dashboard-action:hover{transform:translateY(-2px);border-color:#a9c9df;text-decoration:none}
+.dashboard-action>span{display:grid;place-items:center;width:38px;height:38px;background:#eaf2f8;border-radius:11px;color:var(--blue);font-size:22px}
+.dashboard-action strong{font-size:14px}
+.dashboard-action small{font-size:12px;color:var(--muted);line-height:1.45}
+.dashboard-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:14px}
+.dashboard-plan-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.dashboard-plan-top{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%}
+.dashboard-plan-top h3{margin:0}
+.dashboard-plan-balance{font-size:25px;color:var(--blue);margin-top:7px}
+.dashboard-plan-card .button{margin-top:7px}
+.dashboard-lower-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(230px,.8fr);gap:20px;align-items:start}
+.dashboard-lower-grid .dashboard-section{min-width:0}
+.dashboard-help-card{display:flex;flex-direction:column;align-items:flex-start;padding:22px;background:#f0f6fa;border:1px solid #dce9f2;border-radius:17px}
+.dashboard-help-card h2{margin:7px 0;color:var(--navy)}
+.dashboard-help-card p{margin:0 0 16px}
+.dashboard-text-link{font-size:13px;font-weight:750;margin-top:14px}
+.dashboard-notifications{margin:24px 0}
+@media(max-width:900px){.dashboard-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-balance-card{grid-column:span 2}.dashboard-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.dashboard-page{padding-top:20px;padding-bottom:95px}.dashboard-welcome{align-items:flex-start;flex-direction:column;gap:9px}.dashboard-summary{gap:10px;margin:16px 0 24px}.dashboard-stat{min-height:118px;padding:14px}.dashboard-balance-card{min-height:132px;padding:18px}.dashboard-actions{gap:9px}.dashboard-action{padding:14px}.dashboard-action small{font-size:11px}.dashboard-lower-grid{grid-template-columns:1fr;gap:8px}.dashboard-section-heading h2{font-size:19px}.dashboard-plan-card{padding:17px}}
