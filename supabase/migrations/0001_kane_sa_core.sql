@@ -128,7 +128,9 @@ create unique index if not exists idx_withdrawal_provider_reference on public.wi
 create or replace function public.set_updated_at()
 returns trigger language plpgsql set search_path = public, pg_temp as $$
 begin new.updated_at = now(); return new; end; $$;
+drop trigger if exists profiles_updated_at on public.profiles;
 create trigger profiles_updated_at before update on public.profiles for each row execute function public.set_updated_at();
+drop trigger if exists plans_updated_at on public.savings_plans;
 create trigger plans_updated_at before update on public.savings_plans for each row execute function public.set_updated_at();
 
 create or replace function public.audit_settings_update()
@@ -138,6 +140,7 @@ begin
   values(auth.uid(),'settings_updated','app_settings',new.id::text,jsonb_build_object('fees_enabled',new.fees_enabled,'maintenance_mode',new.maintenance_mode,'normal_fee_percent',new.normal_withdrawal_fee_percent,'emergency_fee_percent',new.emergency_withdrawal_fee_percent));
   return new;
 end; $$;
+drop trigger if exists audit_settings_after_update on public.app_settings;
 create trigger audit_settings_after_update after update on public.app_settings for each row execute function public.audit_settings_update();
 
 -- Kreye pwofil la otomatikman lè Supabase Auth kreye itilizatè a.
@@ -151,6 +154,7 @@ begin
   on conflict (id) do nothing;
   return new;
 end; $$;
+drop trigger if exists on_auth_user_created on auth.users;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
 
@@ -173,6 +177,7 @@ begin
   if new.id is distinct from old.id then raise exception 'ID pwofil la pa ka chanje.'; end if;
   return new;
 end; $$;
+drop trigger if exists prevent_profile_role_change on public.profiles;
 create trigger prevent_profile_role_change before update on public.profiles for each row execute function public.prevent_profile_privilege_escalation();
 
 -- Balans aktyèl = depo admin konfime mwens retrè ki deja peye.
