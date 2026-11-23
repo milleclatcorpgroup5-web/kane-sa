@@ -176,6 +176,14 @@ Pwojè sa a konsève Next.js 15 + OpenNext pou limite chanjman sou baz V2 a. Ope
 
 `wrangler.jsonc` deja fikse non Worker la kòm `kane-sa-web`. Chanje non sa a si non an deja itilize sou kont Cloudflare ou.
 
+### Adrès sit la: Workers, pa Pages
+
+KANÈ SA itilize **Cloudflare Workers + OpenNext**. Li pa kreye yon pwojè Pages, kidonk `https://kane-sa.pages.dev` pa adrès aplikasyon sa a. Konfigirasyon an aktive `workers_dev` pou Worker la ka resevwa yon adrès `workers.dev` si subdomain Workers la aktive sou kont Cloudflare la.
+
+Apre deplwaman, jwenn adrès egzak la nan **Cloudflare → Workers & Pages → kane-sa-web → Settings → Domains & Routes**. Sèvi ak adrès `workers.dev` ki parèt la, oswa ajoute yon custom domain. Pa devine account subdomain lan. Si pa gen adrès `workers.dev` ki parèt, aktive Workers.dev subdomain nan kont Cloudflare la anvan ou teste sit la.
+
+GitHub CI verifye kounye a tou `opennextjs-cloudflare build`; sa teste adaptè Worker la anplis build Next.js nòmal la. Li pa ranplase tès runtime sou adrès piblik la.
+
 ## 6. Firebase notifikasyon (opsyonèl)
 
 1. Kreye yon Firebase Web App nan Firebase Console.
